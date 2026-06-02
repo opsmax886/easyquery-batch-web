@@ -116,6 +116,11 @@
       font-size: 13px;
     }
 
+    .input-format-note {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
     textarea {
       width: 100%;
       min-height: 370px;
@@ -332,7 +337,7 @@
             <h2>导入数据</h2>
             <span class="title-note">（T：度数，P：MPa，M：默认统一为1000）</span>
           </div>
-          <span class="small">支持逗号、Tab、空格分隔</span>
+          <span class="small input-format-note">支持逗号、Tab、空格分隔</span>
         </div>
         <textarea id="input" spellcheck="false" placeholder="T,P,M
 148.42,7.65,1000
