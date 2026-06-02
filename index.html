@@ -97,6 +97,20 @@
       letter-spacing: 0;
     }
 
+    .title-with-note {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .title-note {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 520;
+    }
+
     .small {
       color: var(--muted);
       font-size: 13px;
@@ -314,7 +328,10 @@
     <div class="grid">
       <section class="panel">
         <div class="section-title">
-          <h2>导入数据</h2>
+          <div class="title-with-note">
+            <h2>导入数据</h2>
+            <span class="title-note">（T：度数，P：MPa，M：默认统一为1000）</span>
+          </div>
           <span class="small">支持逗号、Tab、空格分隔</span>
         </div>
         <textarea id="input" spellcheck="false" placeholder="T,P,M
