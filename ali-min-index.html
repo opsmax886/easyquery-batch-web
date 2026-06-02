@@ -439,11 +439,24 @@
       return String(value || "").trim().replace(/\s+/g, "").toLowerCase();
     }
 
+    function isTHeader(value) {
+      return value === "t" || value.startsWith("t(") || value.startsWith("temperature") || value.includes("温度");
+    }
+
+    function isPHeader(value) {
+      return value === "p" || value.startsWith("p(") || value.startsWith("pressure") || value.includes("压力");
+    }
+
+    function isMHeader(value) {
+      return value === "m" || value.startsWith("m(") || value.startsWith("mass") || value.includes("质量");
+    }
+
     function splitLine(line) {
       const trimmed = line.trim();
       if (!trimmed) return [];
       if (trimmed.includes("\t")) return trimmed.split("\t").map((v) => v.trim());
-      if (trimmed.includes(",")) return trimmed.split(",").map((v) => v.trim());
+      if (trimmed.includes(",") || trimmed.includes("，")) return trimmed.split(/[，,]/).map((v) => v.trim());
+      if (trimmed.includes(";")) return trimmed.split(";").map((v) => v.trim());
       return trimmed.split(/\s+/).map((v) => v.trim());
     }
 
@@ -453,14 +466,19 @@
       return Number(text.replace(/[，,]$/, ""));
     }
 
+    function toMass(value) {
+      const text = String(value ?? "").trim();
+      if (!text) return 1000;
+      return toNumber(text);
+    }
+
     function parseInput(text) {
       const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       if (!lines.length) return [];
 
       const first = splitLine(lines[0]);
       const headerMap = first.map(normalizeHeader);
-      const hasHeader = headerMap.some((h) => ["t", "温度", "temperature"].includes(h)) &&
-        headerMap.some((h) => ["p", "压力", "pressure"].includes(h));
+      const hasHeader = headerMap.some(isTHeader) && headerMap.some(isPHeader);
 
       let tIndex = 0;
       let pIndex = 1;
@@ -468,9 +486,9 @@
       let dataLines = lines;
 
       if (hasHeader) {
-        tIndex = headerMap.findIndex((h) => ["t", "温度", "temperature"].includes(h));
-        pIndex = headerMap.findIndex((h) => ["p", "压力", "pressure"].includes(h));
-        mIndex = headerMap.findIndex((h) => ["m", "质量", "mass"].includes(h));
+        tIndex = headerMap.findIndex(isTHeader);
+        pIndex = headerMap.findIndex(isPHeader);
+        mIndex = headerMap.findIndex(isMHeader);
         if (mIndex < 0) mIndex = 2;
         dataLines = lines.slice(1);
       }
@@ -481,18 +499,18 @@
           index: idx + 1,
           T: toNumber(parts[tIndex]),
           P: toNumber(parts[pIndex]),
-          M: toNumber(parts[mIndex]),
+          M: toMass(parts[mIndex]),
           Err: "",
         };
       }).filter((row) => {
         const valid = Number.isFinite(row.T) && Number.isFinite(row.P) && Number.isFinite(row.M);
-        if (!valid) row.Err = "T/P/M 有空值或非数字";
+        if (!valid) row.Err = "T/P 有空值或非数字";
         return partsEnough(row) || valid;
       });
     }
 
     function partsEnough(row) {
-      return Number.isFinite(row.T) || Number.isFinite(row.P) || Number.isFinite(row.M);
+      return Number.isFinite(row.T) || Number.isFinite(row.P);
     }
 
     function cacheKey(row) {
